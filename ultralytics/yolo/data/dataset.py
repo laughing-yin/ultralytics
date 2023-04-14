@@ -58,10 +58,14 @@ class YOLODataset(BaseDataset):
                  use_segments=False,
                  use_keypoints=False,
                  names=None,
-                 classes=None):
+                 classes=None,
+                 negative_sample=False,
+                 negative_dataset=None):
         self.use_segments = use_segments
         self.use_keypoints = use_keypoints
         self.names = names
+        self.negative_sample = negative_sample
+        self.negative_dataset = negative_dataset
         assert not (self.use_segments and self.use_keypoints), 'Can not use both segments and keypoints.'
         super().__init__(img_path, imgsz, cache, augment, hyp, prefix, rect, batch_size, stride, pad, single_cls,
                          classes)
@@ -159,7 +163,7 @@ class YOLODataset(BaseDataset):
                 'To avoid this please supply either a detect or segment dataset, not a detect-segment mixed dataset.')
             for lb in labels:
                 lb['segments'] = []
-        if len_cls == 0:
+        if len_cls == 0 and self.negative_sample is False:
             raise ValueError(f'All labels empty in {cache_path}, can not start training without labels. {HELP_URL}')
         return labels
 

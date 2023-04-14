@@ -81,7 +81,19 @@ class BaseMixTransform:
             indexes = [indexes]
 
         # get images information will be used for Mosaic or MixUp
-        mix_labels = [self.dataset.get_label_info(i) for i in indexes]
+        # mix_labels = [self.dataset.get_label_info(i) for i in indexes]
+
+        negative_sample_num = random.randint(1, 2)
+        negative_sample_indexs = []
+        if self.dataset.negative_dataset:
+            negative_sample_indexs = [random.randint(0, len(self.dataset.negative_dataset) - 1) for _ in range(negative_sample_num)]
+
+        if len(negative_sample_indexs):
+            mix_labels = [self.dataset.negative_dataset.get_label_info(i) for i in negative_sample_indexs]
+            for i in range(len(indexes) - negative_sample_num):
+                mix_labels.append(self.dataset.get_label_info(indexes[i]))
+        else:
+            mix_labels = [self.dataset.get_label_info(i) for i in indexes]
 
         if self.pre_transform is not None:
             for i, data in enumerate(mix_labels):
